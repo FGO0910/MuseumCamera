@@ -1,4 +1,4 @@
-ECLIPSE ANDROID PROJECT IMPORT SUMMARY
+aECLIPSE ANDROID PROJECT IMPORT SUMMARY
 ======================================
 
 Ignored Files:
