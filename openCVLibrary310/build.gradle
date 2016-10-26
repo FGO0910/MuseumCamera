@@ -6,7 +6,8 @@ android {
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 24
+        targetSdkVersion 22
+
     }
 
     buildTypes {

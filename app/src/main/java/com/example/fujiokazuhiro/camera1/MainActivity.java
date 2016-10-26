@@ -1,9 +1,9 @@
 package com.example.fujiokazuhiro.camera1;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
+//import java.io.BufferedWriter;
+//import java.io.File;
+//import java.io.FileOutputStream;
+//import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -37,7 +37,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
+//import android.os.Environment;
 import android.provider.MediaStore;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
