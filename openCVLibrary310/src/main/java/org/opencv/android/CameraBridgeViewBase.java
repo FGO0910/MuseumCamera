@@ -77,7 +77,7 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
 
         getHolder().addCallback(this);
         mMaxWidth = MAX_UNSPECIFIED;
-        mMaxHeight = MAX_UNSPECIFIED;
+        mMaxHeight = 1000;
         styledAttrs.recycle();
     }
 
