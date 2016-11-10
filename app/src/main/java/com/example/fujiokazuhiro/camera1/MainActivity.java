@@ -125,27 +125,18 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
 //    @Override
 //    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
 //        Mat image = inputFrame.rgba();
-//        Mat gray = new Mat(3, 3, CvType.CV_32FC2);
-//        Mat dst_bin = new Mat(3, 3, CvType.CV_32FC2);
-//        Mat hierarchy = new Mat(3, 3, CvType.CV_32FC2);
-//        Resources r = getResources();
-//        Bitmap bmp_frame = BitmapFactory.decodeResource(r, R.drawable.image);
-////        bmp_frame = Bitmap.createScaledBitmap(bmp_frame, 640, 480, false);
-//        Mat mat = new Mat(3,3,CvType.CV_32FC2);
-//        Core.add(mat, image, image);
+//        Mat gray = new Mat();
+//        Mat dst_bin = new Mat();
+//        Mat hierarchy = new Mat();
+
 //        Imgproc.pyrDown(image, image);
 //        Imgproc.pyrUp(image, image);
 //        Imgproc.cvtColor(image , gray, Imgproc.COLOR_RGB2GRAY);
 //        Imgproc.threshold(gray,dst_bin, 0, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_OTSU);
+//
 //        ArrayList<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+//
 //        Imgproc.findContours(dst_bin,contours,hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE  );
-////        Imgproc.cvtColor(gray , gray, Imgproc.COLOR_GRAY2BGRA,4);
-////        Imgproc.drawContours(gray, contours, -1,  new Scalar(255, 0, 0), 1);
-//
-//
-////        for(int i = 0; i < contours.size(); i++){
-////                    Imgproc.polylines(image, contours, true, new Scalar(0, 255, 0), 2);
-////        }
 //
 //
 //        Log.d("tag_contours.size()", "" + contours.size());
@@ -184,26 +175,91 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
 //        return image;
 //    }
 
+
+
     //画像合成お試し
+//    @Override
+//    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+//        Mat mat = new Mat();
+//        Mat mat1 = new Mat();
+//        Mat mat2 = new Mat();
+//        Resources r = getResources();
+//        //画像読み込み
+//        Bitmap bmp_frame1 = BitmapFactory.decodeResource(r, R.drawable.image);
+//        Bitmap bmp_frame2 = BitmapFactory.decodeResource(r, R.drawable.image);
+//        //リサイズ
+//        bmp_frame1 = Bitmap.createScaledBitmap(bmp_frame1, 1280, 720, false);
+//        bmp_frame2 = Bitmap.createScaledBitmap(bmp_frame2, 500, 500, false);
+//        //Bitmap型からMatへ変換
+//        Utils.bitmapToMat(bmp_frame1, mat1);
+//        Utils.bitmapToMat(bmp_frame2, mat2);
+//
+//        mat = inputFrame.rgba();
+//
+//        paste(mat, mat1, 10, 10, 500, 500);
+//
+//        return mat;
+//    }
+
+
+
+    //1枚の画像処理お試し
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        Mat mat1 = new Mat();
-        Mat mat2 = new Mat();
+        Mat image = new Mat();
+        Mat gray = new Mat();
+        Mat dst_bin = new Mat();
+        Mat hierarchy = new Mat();
         Resources r = getResources();
-        Bitmap bmp_frame1 = BitmapFactory.decodeResource(r, R.drawable.image);
-        bmp_frame1 = Bitmap.createScaledBitmap(bmp_frame1, 1280, 720, false);
-        Bitmap bmp_frame2 = BitmapFactory.decodeResource(r, R.drawable.image);
-        bmp_frame2 = Bitmap.createScaledBitmap(bmp_frame2, 500, 500, false);
-        Utils.bitmapToMat(bmp_frame1, mat1);
-        Utils.bitmapToMat(bmp_frame2, mat2);
+        Bitmap bmp_frame = BitmapFactory.decodeResource(r, R.drawable.image);
+        bmp_frame = Bitmap.createScaledBitmap(bmp_frame, 1280, 720, false);
+        Utils.bitmapToMat(bmp_frame, image);
+        Imgproc.pyrDown(image, image);
+        Imgproc.pyrUp(image, image);
+        Imgproc.cvtColor(image , gray, Imgproc.COLOR_RGB2GRAY);
+        Imgproc.threshold(gray,dst_bin, 0, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_OTSU);
+        ArrayList<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+        Imgproc.findContours(dst_bin,contours,hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE  );
 
-        paste(mat1, mat2, 10, 10, 500, 500);
+        Log.d("tag_contours.size()", "" + contours.size());
 
-        return mat1;
+        ArrayList<MatOfPoint2f> approx = new ArrayList<MatOfPoint2f>();
+        ArrayList<MatOfPoint> out = new ArrayList<MatOfPoint>();
 
+        //輪郭が四角形かどうかの判定
+        for(int i = 0; i < contours.size(); i++) {
+            MatOfPoint2f mop2f1 = new MatOfPoint2f();
+            MatOfPoint2f mop2f2 =new MatOfPoint2f();
+            MatOfPoint mop = new MatOfPoint();
+            contours.get(i).convertTo(mop2f1, CvType.CV_32FC2);
 
+            //直線近似
+            Imgproc.approxPolyDP(mop2f1,mop2f2, 10.0, true);
+            mop2f2.convertTo(mop, CvType.CV_32FC2);
+            out.add(mop);
+            approx.add(mop2f2);
+            double area =Imgproc.contourArea(approx.get(i));
+            Log.d("tag_area", "" + area);
+            Log.d("tag_approx.size()", "" + approx.size());
+
+            //近似が４点かつ面積が一定以上
+            if(approx.size() == 4 && area > 200) {
+                Imgproc.polylines(image, contours, true, new Scalar(0, 255, 0), 2);
+            }
+
+        }
+        return image;
     }
 
+
+    //角検出お試し
+//    @Override
+//    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+//
+//    }
+
+
+    //srcをdstの座標(x, y)に幅width、高さheightで埋め込むメソッド
     public void paste(Mat dst, Mat src, int x, int y, int width, int height){
         int w, h, u, v, px, py;
         Mat resized_img = new Mat();
